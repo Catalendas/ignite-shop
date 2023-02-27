@@ -2,6 +2,8 @@ import { stripe } from "@/lib/stripe"
 import { ImageContainer, ProductContainer, ProductDatails } from "@/styles/pages/product"
 import { GetStaticPaths, GetStaticProps } from "next"
 import Image from "next/image"
+import { useRouter } from "next/router"
+import Skeleton from "react-loading-skeleton"
 import Stripe from "stripe"
 
 interface ProductProps {
@@ -17,21 +19,21 @@ interface ProductProps {
 export default function Produtc({ product }: ProductProps) {
  
     return (
-        <ProductContainer>
-            <ImageContainer>
-                <Image src={product.imageUrl} width={520} height={480} alt=""/>
-            </ImageContainer>
+        <ProductContainer>               
+                    <ImageContainer>
+                        <Image src={product.imageUrl} width={520} height={480} alt=""/>
+                    </ImageContainer>
 
-            <ProductDatails>
-                <h1>{product.name}</h1>
-                <span>{product.price}</span>
+                    <ProductDatails>
+                        <h1>{product.name}</h1>
+                        <span>{product.price}</span>
 
-                <p>{product.description}</p>
+                        <p>{product.description}</p>
 
-                <button>
-                    Comprar
-                </button>
-            </ProductDatails>
+                        <button>
+                            Comprar
+                        </button>
+                    </ProductDatails>
         </ProductContainer>
     )
 }
@@ -40,9 +42,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
     return {
         paths: [
-            {params: {id: ""}}
+            {params: {id: "prod_NORlOoqcM2ZtlI"}}
         ],
-        fallback: false,
+        fallback: true,
     }
 }
 
@@ -74,6 +76,7 @@ export const getStaticProps: GetStaticProps<any, { id: string}> = async ({ param
                 }).format(price.unit_amount! / 100),
                 description: product.description
             }
-        }
+        },
+        revalidate: 60 * 60 * 1
     }
 }
