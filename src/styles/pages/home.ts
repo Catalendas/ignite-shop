@@ -1,4 +1,4 @@
-import { transform } from "typescript";
+
 import { styled } from "..";
 import Link from "next/link"
 
@@ -7,14 +7,24 @@ export const HomeContainer = styled("main",{
     width: "100%",
     maxWidth: "calc(100vw - ((100vw - 1180px) / 2))",
     marginLeft: "auto",
-    height: 656,
+    height: 900,
 })
 
-export const Product = styled(Link, {
+export const SliderContainer = styled("div", {
+    display: "flex",
+    gap: "3rem",
+    margin: "0 auto",
+    '.embla__slide': {
+        minWidth: "43.5rem",
+    }
+})
+
+export const Product = styled("div", {
     background: "linear-gradient(180deg, #1ea483 0%, #7465d4 100%)",
     borderRadius: 8,
     cursor: "pointer",
     position: "relative",
+    minHeight: 656,
 
     display: "flex",
     alignItems: "center",
@@ -40,6 +50,11 @@ export const Product = styled(Link, {
 
         backgroundColor: "rgba(0, 0, 0, 0.6)",
 
+        div: {
+            display: "flex",
+            flexDirection: "column"
+        },
+
         strong: {
             fontSize: "$lg",
             color: "$gray100",
@@ -49,6 +64,20 @@ export const Product = styled(Link, {
             fontSize: "xl",
             fontWeight: "bold",
             color: "$green300"
+        },
+
+        button: {
+            width: "4.66rem",
+            cursor: "pointer",
+            height: "4.66rem",
+            border: 0,
+            borderRadius: "8px",
+            color: "$white",
+            background: "$green500",
+
+            "&:hover": {
+                background: "$green300"
+            },
         },
 
         transform: "translateY(110%)",

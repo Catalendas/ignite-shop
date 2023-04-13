@@ -1,55 +1,96 @@
-import { HomeContainer, Product } from "@/styles/pages/home"
+import { HomeContainer, Product, SliderContainer } from "@/styles/pages/home"
 import Image from "next/image"
-import {useKeenSlider} from "keen-slider/react"
-
-import camiseta1 from "../assets/camisetas/1.png"
-import camiseta2 from "../assets/camisetas/2.png"
-import camiseta3 from "../assets/camisetas/3.png"
 
 import "keen-slider/keen-slider.min.css"
 import { stripe } from "@/lib/stripe"
 import { GetStaticProps } from "next"
 import Stripe from "stripe"
 import Head from "next/head"
+import {MouseEvent, useEffect, useState} from "react"
+import { useCart } from "@/Hooks/useCart"
+import { IProduct } from "@/Context/cartContext"
+import { ProductSkeleton } from "@/components/Skeleton"
+import useEmblaCarousel from "embla-carousel-react"
+import { Handbag } from "phosphor-react"
+import Link from "next/link"
 
 
 interface HomeProps {
-  products: {
-    id: string,
-    name: string,
-    imageUrl: string,
-    price: string
-  }[]
+  products: IProduct[]
 }
 
 export default function Home({products}: HomeProps) {
 
-  const [slideRef] = useKeenSlider({
-    slides: {
-      perView: 3,
-      spacing: 48,
-    }
+  const [emblaRef] = useEmblaCarousel({
+    align: 'start',
+    skipSnaps: false,
+    dragFree: true
   })
+
+  const { addToCart, checkIfItemAlredyExists } = useCart()
+
+  const [isLoading, setIsLoading] = useState(true)
+
+  function handleAddToCart(e: MouseEvent<HTMLButtonElement>, product: IProduct) {
+    e.preventDefault()
+    addToCart(product)
+  }
+
+  useEffect(() => {
+    const timeOut = setTimeout(() => setIsLoading(false), 2000)
+
+    return () => clearTimeout(timeOut)
+  }, [])
 
   return (
     <>
     <Head>
       <title>Ignite shop</title>
     </Head>
-      <HomeContainer ref={slideRef} className="keen-slider">
-        {products.map( product => {
-          return (
-              <Product className="keen-slider__slide" key={product.id} href={`/product/${product.id}`} prefetch={false}>
-                <Image src={product.imageUrl} width={520} height={480} alt={product.name}/>
+      <div style={{overflow: 'hidden', width: "100%"}}>
+        <HomeContainer>
+          <div className="embla" ref={emblaRef}>
+            <SliderContainer className="embla__container container">
+              {isLoading ? (
+                <>
+                  <ProductSkeleton className="keen-slider__slide"/>
+                  <ProductSkeleton className="keen-slider__slide"/>
+                  <ProductSkeleton className="keen-slider__slide"/>
+                </>
+              ): (
+                <>
+                  {products.map( product => {
+                return (
+                    <Link 
+                      key={product.id}
+                      href={`/product/${product.id}`}
+                      prefetch={false}
+                      passHref
+                    >   
+                      <Product className="embla__slide">
+                        <Image src={product.imageUrl} width={520} height={480} alt={product.name}/>
 
-                <footer>
-                  <strong>{product.name}</strong>
-                  <span>{product.price}</span>
-                </footer>   
-              </Product>
-          )
-          })}
-      </HomeContainer>
+                        <footer>
+                          <div>
+                            <strong>{product.name}</strong>
+                            <span>{product.price}</span>
+                          </div>
+                          <button disabled={checkIfItemAlredyExists(product.id)} onClick={(e) => handleAddToCart(e, product)}>
+                            <Handbag size={32}/>
+                          </button>
+                          </footer>   
+                      </Product>
+                    </Link>
+                )
+                })}
+                </>
+              )}
+              
+              
+            </SliderContainer>
+          </div>
+        </HomeContainer>
+      </div>
     </>
   )
 }
@@ -70,9 +111,9 @@ export const getStaticProps: GetStaticProps = async () => {
       price: new Intl.NumberFormat("pt-br", {
         style: "currency",
         currency: "BRL"
-      }).format(price.unit_amount! / 100
-      ),
-
+      }).format(price.unit_amount! / 100),
+      numberPrice: price.unit_amount / 100,
+      defaultPriceId: price.id,
     }
   })
 
